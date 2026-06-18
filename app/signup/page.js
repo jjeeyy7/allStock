@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Resend } from 'resend';
+import { Resend } from 'resend(process.env.RESEND_API_KEY);';
 import { Mail, ArrowRight, Lock, Check } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
 
