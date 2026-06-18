@@ -44,7 +44,7 @@ export default function SignupForm() {
             // ⚠️ [수정] 중복 체크 자체에서 서버 에러가 발생한 경우 즉시 중단
             if (checkError) {
                 console.error('유저 중복 체크 에러 상세:', checkError);
-                alert('이미 등록된 이메일입니다. 로그인 페이지를 이용해 주세요.');
+                alert('유저 확인 중 서버 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.');
                 isSubmitting.current = false;
                 setIsLoading(false);
                 return; // 👈 여기서 가로막아줘야 다음으로 안 넘어갑니다!
