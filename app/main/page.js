@@ -47,37 +47,6 @@ export default function LoginPage() {
                         </div>
                     </div>
 
-                    {/* 비밀번호 입력창 
-                    <div className="space-y-1.5">
-                        <div className="flex justify-between items-center">
-                            <label className="text-sm font-medium text-slate-700">비밀번호</label>
-                            <a href="#" className="text-xs font-semibold text-indigo-600 hover:text-indigo-500 transition-colors">
-                                비밀번호를 잊으셨나요?
-                            </a>
-                        </div>
-                        <div className="relative">
-                            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                                <Lock size={18} />
-                            </div>
-                            <input
-                                type={showPassword ? 'text' : 'password'}
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                placeholder="••••••••"
-                                className="w-full pl-10 pr-11 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-sm"
-                                required
-                            />
-                            <button
-                                type="button"
-                                onClick={() => setShowPassword(!showPassword)}
-                                className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 transition-colors"
-                            >
-                                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                            </button>
-                        </div>
-                    </div>
-*/}
-
                 </div>
                 <div>
                     {/* 로그인 버튼 */}
