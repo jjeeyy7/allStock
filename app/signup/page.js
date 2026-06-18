@@ -4,34 +4,18 @@ import { useState } from 'react';
 import { Mail, ArrowRight, Lock, Check } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
 
-export default function SignupForm() {
+// 객체 재생성 및 세션 혼선 방지를 위해 컴포넌트 외부에서 단 한 번만 선언
+const supabase = createClient();
 
+export default function SignupForm() {
     const [email, setEmail] = useState('');
     const [error, setError] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
-
-    const supabase = createClient();
-
+    const [isComplete, setIsComplete] = useState(false); // 인증 완료 화면 제어 상태
     const [otp, setOtp] = useState('');
 
-    const handleVerifyOtp = async (e) => {
-        e.preventDefault();
-
-        const { error } = await supabase.auth.verifyOtp({
-            email: email,
-            token: otp,
-            type: 'magiclink', // Supabase 설정에 따라 'magiclink'로 변경 가능
-        });
-
-        if (error) {
-            alert('인증번호가 올바르지 않습니다.');
-            console.error(error);
-        } else {
-            window.location.href = '/main'; // 인증 성공 시 이동할 주소
-        }
-    };
-
-    const handleSubmit = async (e) => { // 1. async 추가
+    // 1단계: 이메일 입력 후 인증번호 발송 요청
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         console.log("URL:", process.env.NEXT_PUBLIC_SUPABASE_URL);
@@ -49,27 +33,41 @@ export default function SignupForm() {
         } else {
             setError(false);
 
-
             console.log("Supabase URL 확인:", process.env.NEXT_PUBLIC_SUPABASE_URL);
             console.log("Supabase Client 객체 확인:", supabase);
 
-            // 2. 여기서 진짜로 Supabase에 메일 보내달라고 요청!
             const { error } = await supabase.auth.signInWithOtp({
-                email: email,
+                email: email.toLowerCase().trim(),
                 options: {
-                    // 현재 브라우저 주소가 localhost면 localhost로, 배포 도메인이면 배포 도메인으로 자동 처리!
                     emailRedirectTo: `${window.location.origin}/auth/callback`,
                 },
             });
-            // 3. 서버 응답 확인
+
             if (error) {
                 console.error('메일 발송 에러:', error.message);
                 alert('메일 발송 중 문제가 생겼어요.');
                 console.error('메일 발송 에러 상세 내용:', error);
             } else {
-                // 4. 에러가 없을 때만 성공 화면으로 전환
                 setIsSuccess(true);
             }
+        }
+    };
+
+    // 2단계: 사용자가 입력한 인증번호(OTP) 검증 요청
+    const handleVerifyOtp = async (e) => {
+        e.preventDefault();
+
+        const { error } = await supabase.auth.verifyOtp({
+            email: email.toLowerCase().trim(),
+            token: otp.trim(),
+            type: 'magiclink', // 신규 회원가입 흐름은 'signup'을 사용해야 정확히 일치합니다.
+        });
+
+        if (error) {
+            alert('인증번호가 올바르지 않습니다.');
+            console.error(error);
+        } else {
+            setIsComplete(true); // 인증 성공 시 완료 화면 상태를 true로 전환
         }
     };
 
@@ -77,9 +75,27 @@ export default function SignupForm() {
         <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 text-slate-800">
             <div className="bg-white w-full max-w-4xl min-h-[500px] rounded-[40px] shadow-xl flex flex-col md:flex-row overflow-hidden">
 
-                {/* 오른쪽: 폼 영역 */}
+                {/* 폼 영역 */}
                 <div className="flex-[1.2] p-8 md:p-12 bg-white flex flex-col justify-center">
-                    {!isSuccess ? (
+                    {isComplete ? (
+                        /* 3단계: 인증 완료 성공 화면 */
+                        <div className="text-center animate-in fade-in slide-in-from-bottom-4 duration-500 w-full max-w-md mx-auto">
+                            <div className="w-20 h-20 bg-[#dcfd8b] rounded-full flex justify-center items-center mx-auto mb-6">
+                                <Check className="w-10 h-10 text-slate-800" />
+                            </div>
+                            <h3 className="text-3xl font-bold mb-4">인증 완료! 🎉</h3>
+                            <p className="text-slate-500 text-lg mb-8">
+                                인증이 성공적으로 되었습니다.<br />이제 서비스를 이용하실 수 있습니다.
+                            </p>
+                            <a 
+                                href="/main" 
+                                className="inline-block w-full py-4 bg-slate-800 text-white rounded-2xl font-bold text-lg hover:bg-[#bc84ee] hover:shadow-lg transition-all text-center"
+                            >
+                                시작하기
+                            </a>
+                        </div>
+                    ) : !isSuccess ? (
+                        /* 1단계: 이메일 입력 화면 */
                         <div className="animate-in fade-in duration-500">
                             <h2 className="text-3xl md:text-4xl font-bold mb-2">안녕하세요 👋</h2>
                             <p className="text-slate-500 mb-8 text-lg">아래 이메일을 입력하시고 가입하기 버튼을 눌러 가입을 진행해주세요. </p>
@@ -111,7 +127,7 @@ export default function SignupForm() {
 
                                 <button
                                     type="submit"
-                                    className="w-full py-4 bg-slate-800 text-white rounded-2xl font-bold text-lg hover:bg-[#bc84ee] hover:-translate-y-1 hover:shadow-lg transition-all flex justify-center items-center gap-2"
+                                    className="w-full py-4 bg-slate-800 text-white rounded-2xl font-bold text-lg hover:bg-[#bc84ee] hover:-translate-y-1 hover:shadow-lg transition-all flex justify-center items-center cursor-pointer gap-2"
                                 >
                                     가입하기 <ArrowRight className="w-5 h-5" />
                                 </button>
@@ -122,8 +138,7 @@ export default function SignupForm() {
                             </form>
                         </div>
                     ) : (
-                        /* 가입 성공 화면 */
-                        /* OTP 인증번호 입력 화면 */
+                        /* 2단계: OTP 인증번호 입력 화면 (마크업 구조 유지) */
                         <div className="text-center animate-in fade-in slide-in-from-bottom-4 duration-500 w-full max-w-md mx-auto">
                             <div className="w-20 h-20 bg-purple-100 rounded-full flex justify-center items-center mx-auto mb-6">
                                 <Mail className="w-10 h-10 text-[#bc84ee]" />
@@ -132,7 +147,6 @@ export default function SignupForm() {
                             <p className="text-slate-500 text-base mb-8">
                                 {email}로 전송된<br />8자리 인증번호를 입력해 주세요.
                             </p>
-
                             <form onSubmit={handleVerifyOtp} noValidate>
                                 <div className="mb-6">
                                     <input
@@ -144,10 +158,9 @@ export default function SignupForm() {
                                         className="w-full py-4 text-center text-3xl font-bold tracking-[0.5em] pl-[0.5em] rounded-2xl border-2 border-slate-200 bg-slate-50 outline-none focus:border-[#bc84ee] focus:bg-white transition-all"
                                     />
                                 </div>
-
                                 <button
                                     type="submit"
-                                    className="w-full py-4 bg-slate-800 text-white rounded-2xl font-bold text-lg hover:bg-[#bc84ee] hover:shadow-lg transition-all"
+                                    className="w-full py-4 bg-slate-800 text-white rounded-2xl font-bold text-lg hover:bg-[#bc84ee] hover:shadow-lg transition-all cursor-pointer"
                                 >
                                     인증하기
                                 </button>
