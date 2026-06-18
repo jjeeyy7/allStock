@@ -1,10 +1,14 @@
 'use client';
 
 import { useState } from 'react';
+import { Resend } from 'resend';
 import { Mail, ArrowRight, Lock, Check } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
 
 export default function SignupForm() {
+
+    const resend = new Resend(process.env.RESEND_API_KEY);
+
     const [email, setEmail] = useState('');
     const [error, setError] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
@@ -33,10 +37,9 @@ export default function SignupForm() {
             const { error } = await supabase.auth.signInWithOtp({
                 email: email,
                 options: {
-                    emailRedirectTo: 'http://localhost:3000/auth/callback',
+                    emailRedirectTo: 'https://allstock.cloud/auth/callback',
                 },
             });
-
             // 3. 서버 응답 확인
             if (error) {
                 console.error('메일 발송 에러:', error.message);
