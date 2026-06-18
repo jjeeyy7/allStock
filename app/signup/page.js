@@ -12,6 +12,25 @@ export default function SignupForm() {
 
     const supabase = createClient();
 
+    const [otp, setOtp] = useState('');
+
+    const handleVerifyOtp = async (e) => {
+        e.preventDefault();
+
+        const { error } = await supabase.auth.verifyOtp({
+            email: email,
+            token: otp,
+            type: 'magiclink', // Supabase 설정에 따라 'magiclink'로 변경 가능
+        });
+
+        if (error) {
+            alert('인증번호가 올바르지 않습니다.');
+            console.error(error);
+        } else {
+            window.location.href = '/main'; // 인증 성공 시 이동할 주소
+        }
+    };
+
     const handleSubmit = async (e) => { // 1. async 추가
         e.preventDefault();
 
@@ -30,11 +49,16 @@ export default function SignupForm() {
         } else {
             setError(false);
 
+
+            console.log("Supabase URL 확인:", process.env.NEXT_PUBLIC_SUPABASE_URL);
+            console.log("Supabase Client 객체 확인:", supabase);
+
             // 2. 여기서 진짜로 Supabase에 메일 보내달라고 요청!
             const { error } = await supabase.auth.signInWithOtp({
                 email: email,
                 options: {
-                    emailRedirectTo: 'https://allstock.cloud/auth/callback',
+                    // 현재 브라우저 주소가 localhost면 localhost로, 배포 도메인이면 배포 도메인으로 자동 처리!
+                    emailRedirectTo: `${window.location.origin}/auth/callback`,
                 },
             });
             // 3. 서버 응답 확인
@@ -99,16 +123,35 @@ export default function SignupForm() {
                         </div>
                     ) : (
                         /* 가입 성공 화면 */
-                        <div className="text-center animate-in fade-in slide-in-from-bottom-4 duration-500">
-                            <div className="w-20 h-20 bg-[#dcfd8b] rounded-full flex justify-center items-center mx-auto mb-6">
-                                <Check className="w-10 h-10 text-slate-800" />
+                        /* OTP 인증번호 입력 화면 */
+                        <div className="text-center animate-in fade-in slide-in-from-bottom-4 duration-500 w-full max-w-md mx-auto">
+                            <div className="w-20 h-20 bg-purple-100 rounded-full flex justify-center items-center mx-auto mb-6">
+                                <Mail className="w-10 h-10 text-[#bc84ee]" />
                             </div>
-                            <h3 className="text-3xl font-bold mb-4">You're in! 🎉</h3>
-                            <p className="text-slate-500 text-lg mb-13">확인 메일을 보냈습니다.<br />이메일함을 확인해 주세요!</p>
+                            <h3 className="text-3xl font-bold mb-2">인증번호 입력 📩</h3>
+                            <p className="text-slate-500 text-base mb-8">
+                                {email}로 전송된<br />8자리 인증번호를 입력해 주세요.
+                            </p>
 
-                            <a href="/main" className="text-[17px] bg-[#dcfd8b]">
-                                로그인하러가기
-                            </a>
+                            <form onSubmit={handleVerifyOtp} noValidate>
+                                <div className="mb-6">
+                                    <input
+                                        type="text"
+                                        maxLength={8}
+                                        placeholder="00000000"
+                                        value={otp}
+                                        onChange={(e) => setOtp(e.target.value)}
+                                        className="w-full py-4 text-center text-3xl font-bold tracking-[0.5em] pl-[0.5em] rounded-2xl border-2 border-slate-200 bg-slate-50 outline-none focus:border-[#bc84ee] focus:bg-white transition-all"
+                                    />
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    className="w-full py-4 bg-slate-800 text-white rounded-2xl font-bold text-lg hover:bg-[#bc84ee] hover:shadow-lg transition-all"
+                                >
+                                    인증하기
+                                </button>
+                            </form>
                         </div>
                     )}
                 </div>
