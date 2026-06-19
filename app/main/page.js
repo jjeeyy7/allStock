@@ -3,17 +3,19 @@ import Image from 'next/image';
 import KakaoLoginForm from '@/components/main/KakaoLoginForm.js';
 
 import React, { useState } from 'react';
-import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
+import {Mail, Lock} from 'lucide-react';
 
 export default function LoginPage() {
-    const [showPassword, setShowPassword] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
     const handleSubmit = (e) => {
         e.preventDefault();
         // TODO: 나중에 Supabase Auth나 로그인 로직을 여기에 연결하면 됩니다!
-        console.log('로그인 시도:', { email, password });
+
+        const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+        console.log('로그인 시도:', { email });
     };
 
     return (
@@ -46,11 +48,29 @@ export default function LoginPage() {
                             />
                         </div>
                     </div>
-
+                    {/* 패스워드  입력창 */}
+                    <div className="space-y-1.5">
+                        <label className="text-sm font-medium text-slate-700 block">패스워드</label>
+                        <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                <Lock size={18} />
+                            </div>
+                            <input
+                                type="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                placeholder="••••••••"
+                                className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-sm"
+                                required
+                            />
+                        </div>
+                    </div>
                 </div>
                 <div>
                     {/* 로그인 버튼 */}
-                    <button className="flex justify-center items-center bg-slate-800 mt-5 ml-1.5 text-white hover:bg-slate-50 gap-2 py-2.5 px-41 border border-slate-200 rounded-xl">
+                    <button 
+                        type = "submit" 
+                        className="flex justify-center items-center bg-slate-800 mt-5 ml-1.5 text-white hover:bg-slate-700 gap-2 py-2.5 px-41 border border-slate-200 rounded-xl cursor-pointer">
                         로그인
                     </button>
                 </div>

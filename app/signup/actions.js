@@ -25,3 +25,15 @@ export async function createUserProfile(email) {
         
     return { data, error };
 }
+
+export async function updateUserPin(userId, pinCode) {
+    const supabase = await createClient();
+    
+    // 유저의 고유 ID(userId)를 찾아서, pin_code 컬럼에 새로운 번호(pinCode)를 저장합니다.
+    const { data, error } = await supabase
+        .from('profiles')
+        .update({ pin_code: pinCode }) // DB 컬럼명이 pin_code라고 가정했습니다!
+        .eq('id', userId);
+        
+    return { data, error };
+}

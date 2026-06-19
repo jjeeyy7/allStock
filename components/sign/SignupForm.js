@@ -9,6 +9,7 @@ const supabase = createClient();
 
 export default function SignupForm() {
     const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const [error, setError] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
     const [isComplete, setIsComplete] = useState(false);
@@ -93,7 +94,7 @@ export default function SignupForm() {
             type: 'email',
         });
 
-       if (error) {
+        if (error) {
             isSubmitting.current = false;
             setIsLoading(false);
             console.error("인증 에러 상세:", error);
@@ -101,7 +102,21 @@ export default function SignupForm() {
         } else {
             isSubmitting.current = false;
             setIsLoading(false);
-            setIsComplete(true); 
+            setIsComplete(true);
+        }
+    };
+
+    const handleSavePin = async () => {
+        // 1. 현재 로그인한 유저 ID 가져오기
+        const { data: { user } } = await supabase.auth.getUser();
+
+        // 2. 서버 액션(updateUserPin) 호출!
+        const { data, error } = await updateUserPin(user.id, password); // 여기서 password가 6자리 핀코드겠죠?
+
+        if (error) {
+            console.error("핀 번호 저장 실패:", error);
+        } else {
+            console.log("핀 번호 저장 성공!", data);
         }
     };
 
@@ -158,6 +173,31 @@ export default function SignupForm() {
                                         />
                                     </div>
                                     {error && <p className="text-red-500 text-sm mt-2">앗, 올바른 이메일 주소를 입력해 주세요!</p>}
+                                    <label htmlFor="password" className="block text-sm font-semibold mb-2 text-slate-600">
+                                        Password
+                                    </label>
+                                    <div className="relative">
+                                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+                                        <input
+                                            type="password"
+                                            id="password"
+                                            value={password}
+                                            maxLength={6}
+                                            inputMode="numeric"
+                                            pattern="[0-9]*"
+                                            onChange={(e) => {
+                                                const onlyNumbers = e.target.value.replace(/[^0-9]/g, '');
+
+                                                setPassword(onlyNumbers);
+                                                if (error) setError(false);
+                                            }}
+                                            placeholder="123456"
+                                            className={`w-full py-4 pl-12 pr-4 rounded-2xl border-2 outline-none transition-all ${error
+                                                ? 'border-red-400 bg-red-50'
+                                                : 'border-slate-200 bg-slate-50 focus:border-[#bc84ee] focus:bg-white focus:ring-4 focus:ring-purple-100'
+                                                }`}
+                                        />
+                                    </div>
                                 </div>
 
                                 <button

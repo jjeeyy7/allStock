@@ -3,9 +3,11 @@ import SearchButton from '@/components/stock/SearchButton';
 import StockContainer from '@/components/stock/StockContainer';
 import OpenForm from '@/components/stock/OpenForm';
 import CategorySelect from '@/components/stock/CategorySelect';
+import StockGuardContainer from '@/components/stock/StockGuard'; // 경로에 맞게 수정
 
 import { supabase } from '@/lib/supabase';
 import { revalidatePath } from 'next/cache';
+
 
 export default async function InventoryPage({ searchParams }) {
   const params = await searchParams;
@@ -107,6 +109,7 @@ export default async function InventoryPage({ searchParams }) {
   }
 
   return (
+     <StockGuardContainer>
     <div className="min-h-screen bg-[#eae6e6] font-sans text-gray-800">
 
       <header className="flex items-center bg-white border-b border-gray-200">
@@ -164,5 +167,6 @@ export default async function InventoryPage({ searchParams }) {
         />
       </main>
     </div>
+    </StockGuardContainer>
   );
 }
