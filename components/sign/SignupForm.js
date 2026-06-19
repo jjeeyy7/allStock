@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import { Mail, ArrowRight, Lock, Check } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
-import { checkExistingUser } from '@/app/signup/actions'; 
+import { checkExistingUser } from '@/app/signup/actions';
 
 const supabase = createClient();
 
@@ -11,7 +11,7 @@ export default function SignupForm() {
     const [email, setEmail] = useState('');
     const [error, setError] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
-    const [isComplete, setIsComplete] = useState(false); 
+    const [isComplete, setIsComplete] = useState(false);
     const [otp, setOtp] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
@@ -20,7 +20,7 @@ export default function SignupForm() {
     // 1단계: 이메일 입력 후 인증번호 발송 요청
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (isSubmitting.current) return; 
+        if (isSubmitting.current) return;
 
         if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
             alert("환경 변수가 설정되지 않았습니다!");
@@ -77,7 +77,6 @@ export default function SignupForm() {
             }
         }
     };
-
     // 2단계: 사용자가 입력한 인증번호(OTP) 검증 요청
     const handleVerifyOtp = async (e) => {
         e.preventDefault();
@@ -86,22 +85,26 @@ export default function SignupForm() {
         isSubmitting.current = true;
         setIsLoading(true);
 
+        const formattedEmail = email.toLowerCase().trim();
+
         const { error } = await supabase.auth.verifyOtp({
-            email: email.toLowerCase().trim(),
+            email: formattedEmail,
             token: otp.trim(),
-            type: 'magiclink',
+            type: 'email',
         });
 
-        isSubmitting.current = false;
-        setIsLoading(false);
-
-        if (error) {
-            alert('인증번호가 올바르지 않습니다.');
-            console.error(error);
+       if (error) {
+            isSubmitting.current = false;
+            setIsLoading(false);
+            console.error("인증 에러 상세:", error);
+            alert('인증번호가 올바르지 않거나 만료되었습니다.');
         } else {
+            isSubmitting.current = false;
+            setIsLoading(false);
             setIsComplete(true); 
         }
     };
+
 
     return (
         <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 text-slate-800">
@@ -119,8 +122,8 @@ export default function SignupForm() {
                             <p className="text-slate-500 text-lg mb-8">
                                 인증이 성공적으로 되었습니다.<br />이제 서비스를 이용하실 수 있습니다.
                             </p>
-                            <a 
-                                href="/main" 
+                            <a
+                                href="/main"
                                 className="inline-block w-full py-4 bg-slate-800 text-white rounded-2xl font-bold text-lg hover:bg-[#bc84ee] hover:shadow-lg transition-all text-center cursor-pointer"
                             >
                                 시작하기
@@ -184,7 +187,7 @@ export default function SignupForm() {
                                 <div className="mb-6">
                                     <input
                                         type="text"
-                                        maxLength={6}
+                                        maxLength={8}
                                         placeholder="000000"
                                         value={otp}
                                         onChange={(e) => setOtp(e.target.value)}

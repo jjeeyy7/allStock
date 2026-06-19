@@ -14,3 +14,14 @@ export async function checkExistingUser(email) {
         
     return { data, error };
 }
+
+export async function createUserProfile(email) {
+    const supabase = await createClient();
+    
+    // DB에 데이터 삽입
+    const { data, error } = await supabase
+        .from('profiles')
+        .insert([{ email: email, created_at: new Date() }]);
+        
+    return { data, error };
+}
