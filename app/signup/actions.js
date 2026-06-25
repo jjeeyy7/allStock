@@ -15,6 +15,7 @@ export async function checkExistingUser(email) {
     return { data, error };
 }
 
+
 export async function createUserProfile(userId, email, password) {
     const supabase = await createClient();
     
@@ -31,7 +32,6 @@ export async function createUserProfile(userId, email, password) {
 }
 
 export async function updateUserPin(userId, pinCode) {
-    console.log("핀 번호 저장 시도 중:", { userId, pinCode }); // 이 로그가 찍히나요?
     const supabase = await createClient();
     
     // 유저의 고유 ID(userId)를 찾아서, pin_code 컬럼에 새로운 번호(pinCode)를 저장합니다.

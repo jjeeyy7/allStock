@@ -2,10 +2,10 @@
 
 import { useState, useRef } from 'react';
 import { Mail, ArrowRight, Lock, Check } from 'lucide-react';
-import { createClient } from '@/utils/supabase/client';
+import { supabase } from '@/utils/supabase/client';
 import { createUserProfile, checkExistingUser, updateUserPin } from '@/app/signup/actions';
 
-const supabase = createClient();
+
 
 export default function SignupForm() {
     const [email, setEmail] = useState('');

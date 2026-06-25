@@ -3,7 +3,8 @@ import SearchButton from '@/components/stock/SearchButton';
 import StockContainer from '@/components/stock/StockContainer';
 import OpenForm from '@/components/stock/OpenForm';
 import CategorySelect from '@/components/stock/CategorySelect';
-import StockGuardContainer from '@/components/stock/StockGuard'; // 경로에 맞게 수정
+import StockGuardContainer from '@/components/stock/StockGuard';
+import LogoutButton from '@/components/stock/LogoutButton';
 
 import { supabase } from '@/lib/supabase';
 import { revalidatePath } from 'next/cache';
@@ -125,7 +126,7 @@ export default async function InventoryPage({ searchParams }) {
         </nav>
       
         <div className="ml-auto flex items-center gap-4 px-6 ">
-          <button className="px-5 py-5 hover:text-red-500 font-medium text-gray-800 text-lg">로그아웃</button>
+         <LogoutButton />
         </div>
         
       </header>

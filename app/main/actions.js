@@ -1,10 +1,11 @@
 'use server';
 
-import { createClient } from '@/utils/supabase/server'; 
+import { createClient } from '@/utils/supabase/server';
 
 export async function loginUser(email, password) {
-    const supabase = await createClient(); 
     
+    const supabase = await createClient();
+
     const { data, error } = await supabase
         .from('profiles')
         .select('id, email, pin_code') // 핀 번호도 같이 가져와야 비교가 가능합니다!

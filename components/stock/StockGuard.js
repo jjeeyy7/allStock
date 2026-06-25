@@ -1,41 +1,39 @@
-'use client'; 
-
+'use client';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@/utils/supabase/client';
+import { supabase } from '@/utils/supabase/client';
 
 export default function StockGuardContainer({ children }) {
-    const router = useRouter();
-    const supabase = createClient();
     const [isChecking, setIsChecking] = useState(true);
+    const router = useRouter();
 
     useEffect(() => {
-        const checkAuth = async () => {
-            // 1. 로그인된 유저가 있는지 신분증 검사
-            const { data: { user } } = await supabase.auth.getUser();
+        // 1. 인증 상태가 바뀔 때마다 감지
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+            console.log("인증 상태 변경됨:", event, session);
+            
+            if (session) {
+                setIsChecking(false); // 로그인 성공!
+            } else if (event === 'SIGNED_OUT') {
+                router.replace('/main'); // 로그아웃 시 튕기기
+            }
+        });
 
-            if (!user) {
-                // 2. 로그인 안 했으면 경고 띄우고 쫓아내기!
-                alert('잘못된 접근입니다. 먼저 로그인을 해주세요! 🚨');
-                router.push('/main'); 
+        // 2. 처음 페이지 들어왔을 때 딱 한 번만 세션 체크
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            if (!session) {
+                // 세션이 없으면 로그인 페이지로
+                router.replace('/main');
             } else {
-                // 3. 로그인했으면 통과!
                 setIsChecking(false);
             }
-        };
+        });
 
-        checkAuth();
-    }, [router, supabase]);
+        return () => subscription.unsubscribe();
+    }, [router]);
 
-    // 검사 중일 때는 화면 노출을 완전히 차단합니다 (번쩍임 방지)
-    if (isChecking) {
-        return (
-            <div className="flex h-screen items-center justify-center bg-slate-50 font-bold text-xl text-slate-600">
-                신분증 확인 중... 🧐
-            </div>
-        );
-    }
+    // 💡 화면이 깜빡거리거나 잘못된 접근이 뜨지 않도록 처리
+    if (isChecking) return <div>데이터 동기화 중...</div>;
 
-    // 검사 통과하면 감싸고 있던 진짜 주식 화면(children)을 보여줍니다!
     return <>{children}</>;
 }

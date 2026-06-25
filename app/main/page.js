@@ -2,11 +2,13 @@
 import Image from 'next/image';
 import KakaoLoginForm from '@/components/main/KakaoLoginForm.js';
 import { loginUser } from '@/app/main/actions.js';
+import { useRouter } from 'next/navigation';
 
 import React, { useState, useRef } from 'react';
 import { Mail, Lock } from 'lucide-react';
 
 export default function LoginPage() {
+    const router = useRouter();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState(false);
@@ -37,10 +39,14 @@ export default function LoginPage() {
             if (loginError) {
                 console.error('로그인 실패:', loginError);
                 setError(true);
-                alert(loginError.message || '로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.');
+                alert(loginError.message || '로그인에 실패했습니다.');
             } else {
-                console.log("로그인 성공!", loginUser);
-                window.location.href = '/stock';
+                // 💡 수정: userData를 찍어야 진짜 유저 정보가 나옵니다!
+                console.log("로그인 성공!", userData);
+
+                // 💡 더 깔끔한 페이지 이동 방식
+                router.push('/stock');
+                router.refresh(); // 서버 컴포넌트의 인증 상태를 강제로 새로고침
             }
         }
     };

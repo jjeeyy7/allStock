@@ -3,13 +3,13 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 // 1. 클라이언트용 Supabase를 불러옵니다 (경로는 갓벽자님 설정에 맞게 변경하세요!)
-import { createClient } from '@/utils/supabase/client'; 
+import { supabase } from '@/utils/supabase/client'; 
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
 
 export default function LoginForm() {
   const router = useRouter();
   // Supabase 리모컨 준비
-  const supabase = createClient(); 
+
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
