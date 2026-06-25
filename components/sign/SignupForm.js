@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import { Mail, ArrowRight, Lock, Check } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
-import { checkExistingUser } from '@/app/signup/actions';
+import { createUserProfile, checkExistingUser, updateUserPin } from '@/app/signup/actions';
 
 const supabase = createClient();
 
@@ -88,7 +88,8 @@ export default function SignupForm() {
 
         const formattedEmail = email.toLowerCase().trim();
 
-        const { error } = await supabase.auth.verifyOtp({
+        // 1. 인증번호 검증 요청 (핵심 수정 🔑: data: authData를 꼭 받아와야 합니다!)
+        const { data: authData, error } = await supabase.auth.verifyOtp({
             email: formattedEmail,
             token: otp.trim(),
             type: 'email',
@@ -100,26 +101,24 @@ export default function SignupForm() {
             console.error("인증 에러 상세:", error);
             alert('인증번호가 올바르지 않거나 만료되었습니다.');
         } else {
-            isSubmitting.current = false;
-            setIsLoading(false);
+            console.log("인증 성공, 저장 시작")
+            const userId = authData.user?.id;
+
+        // 🔑 2. INSERT가 아닌 UPDATE 호출 (외래키 에러 해결!)
+        const { data, error: updateError } = await updateUserPin(userId, password); 
+
+        isSubmitting.current = false;
+        setIsLoading(false);
+
+        if (updateError) {
+            console.error("핀 번호 저장 에러:", updateError);
+            alert("회원 정보 저장 중 오류가 발생했습니다.");
+        } else {
+            console.log("DB 저장(Update) 성공!", data);
             setIsComplete(true);
         }
-    };
-
-    const handleSavePin = async () => {
-        // 1. 현재 로그인한 유저 ID 가져오기
-        const { data: { user } } = await supabase.auth.getUser();
-
-        // 2. 서버 액션(updateUserPin) 호출!
-        const { data, error } = await updateUserPin(user.id, password); // 여기서 password가 6자리 핀코드겠죠?
-
-        if (error) {
-            console.error("핀 번호 저장 실패:", error);
-        } else {
-            console.log("핀 번호 저장 성공!", data);
         }
     };
-
 
     return (
         <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 text-slate-800">
@@ -198,6 +197,7 @@ export default function SignupForm() {
                                                 }`}
                                         />
                                     </div>
+                                    {error && <p className="text-red-500 text-sm mt-2">비밀번호를 입력해 주세요!</p>}
                                 </div>
 
                                 <button

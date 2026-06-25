@@ -66,11 +66,11 @@ export default function LoginPage() {
                         </div>
                     </div>
                 </div>
-                <div>
+                <div className="flex items-center justify-between mt-2">
                     {/* 로그인 버튼 */}
                     <button 
                         type = "submit" 
-                        className="flex justify-center items-center bg-slate-800 mt-5 ml-1.5 text-white hover:bg-slate-700 gap-2 py-2.5 px-41 border border-slate-200 rounded-xl cursor-pointer">
+                        className="bg-slate-800 mt-5 ml-3 text-white hover:bg-slate-700 gap-2 py-2.5 px-39 border border-slate-200 rounded-xl cursor-pointer">
                         로그인
                     </button>
                 </div>

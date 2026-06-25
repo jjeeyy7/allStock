@@ -15,18 +15,23 @@ export async function checkExistingUser(email) {
     return { data, error };
 }
 
-export async function createUserProfile(email) {
+export async function createUserProfile(userId, email, password) {
     const supabase = await createClient();
     
-    // DB에 데이터 삽입
+    // upsert: 없으면 생성, 있으면 업데이트 (onConflict로 id 기준 중복 확인)
     const { data, error } = await supabase
         .from('profiles')
-        .insert([{ email: email, created_at: new Date() }]);
+        .upsert([{ 
+            id: userId, 
+            email: email,
+            created_at: new Date().toISOString()
+        }], { onConflict: 'id' }); 
         
     return { data, error };
 }
 
 export async function updateUserPin(userId, pinCode) {
+    console.log("핀 번호 저장 시도 중:", { userId, pinCode }); // 이 로그가 찍히나요?
     const supabase = await createClient();
     
     // 유저의 고유 ID(userId)를 찾아서, pin_code 컬럼에 새로운 번호(pinCode)를 저장합니다.
