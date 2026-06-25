@@ -1,22 +1,51 @@
 'use client';
 import Image from 'next/image';
 import KakaoLoginForm from '@/components/main/KakaoLoginForm.js';
+import { loginUser } from '@/app/main/actions.js';
 
-import React, { useState } from 'react';
-import {Mail, Lock} from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { Mail, Lock } from 'lucide-react';
 
 export default function LoginPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [error, setError] = useState(false);
+    const isSubmitting = useRef(false);
+    const [isLoading, setIsLoading] = useState(false);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // TODO: 나중에 Supabase Auth나 로그인 로직을 여기에 연결하면 됩니다!
+        if (isSubmitting.current) return;
 
         const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-        console.log('로그인 시도:', { email });
+        if (!email || !isValid) {
+            setError(true);
+        } else {
+            setError(false);
+            isSubmitting.current = true;
+            setIsLoading(true);
+
+            const formattedEmail = email.toLowerCase().trim();
+
+            // 여기서 실제 로그인 로직 호출
+            const { data: userData, error: loginError } = await loginUser(formattedEmail, password);
+
+            isSubmitting.current = false;
+            setIsLoading(false);
+
+            if (loginError) {
+                console.error('로그인 실패:', loginError);
+                setError(true);
+                alert(loginError.message || '로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.');
+            } else {
+                console.log("로그인 성공!", loginUser);
+                window.location.href = '/stock';
+            }
+        }
     };
+
+
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 p-4">
@@ -29,9 +58,7 @@ export default function LoginPage() {
                     <div>  </div>
                 </div>
 
-                {/* 로그인 폼 */}
-                <div onSubmit={handleSubmit} className="space-y-5">
-                    {/* 이메일 입력창 */}
+                <form onSubmit={handleSubmit} className="space-y-5">
                     <div className="space-y-1.5">
                         <label className="text-sm font-medium text-slate-700 block">이메일</label>
                         <div className="relative">
@@ -43,12 +70,12 @@ export default function LoginPage() {
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 placeholder="example@email.com"
-                                className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-sm"
+                                className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm"
                                 required
                             />
                         </div>
                     </div>
-                    {/* 패스워드  입력창 */}
+
                     <div className="space-y-1.5">
                         <label className="text-sm font-medium text-slate-700 block">패스워드</label>
                         <div className="relative">
@@ -60,20 +87,20 @@ export default function LoginPage() {
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 placeholder="••••••••"
-                                className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-sm"
+                                className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm"
                                 required
                             />
                         </div>
                     </div>
-                </div>
-                <div className="flex items-center justify-between mt-2">
-                    {/* 로그인 버튼 */}
-                    <button 
-                        type = "submit" 
-                        className="bg-slate-800 mt-5 ml-3 text-white hover:bg-slate-700 gap-2 py-2.5 px-39 border border-slate-200 rounded-xl cursor-pointer">
-                        로그인
+
+                    <button
+                        type="submit"
+                        disabled={isLoading}
+                        className="w-full py-3 bg-slate-800 text-white rounded-xl font-bold hover:bg-slate-700 transition-all cursor-pointer"
+                    >
+                        {isLoading ? '로그인 중...' : '로그인'}
                     </button>
-                </div>
+                </form>
 
                 {/* 구분선 */}
                 <div className="relative my-6">

@@ -121,7 +121,13 @@ export default async function InventoryPage({ searchParams }) {
           <button className="px-5 py-5 bg-[#e2dfdf] font-semibold text-black text-lg">재고현황</button>
           <button className="px-5 py-5 hover:bg-gray-50 font-medium text-gray-800 text-lg">대시보드</button>
           <button className="px-5 py-5 hover:bg-gray-50 font-medium text-gray-800 text-lg">설정</button>
+          <button className="px-5 py-5 hover:bg-gray-50 font-medium text-gray-800 text-lg">내정보</button>
         </nav>
+      
+        <div className="ml-auto flex items-center gap-4 px-6 ">
+          <button className="px-5 py-5 hover:text-red-500 font-medium text-gray-800 text-lg">로그아웃</button>
+        </div>
+        
       </header>
 
       <main className="p-8">
