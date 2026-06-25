@@ -1,11 +1,12 @@
 'use client';
 import Image from 'next/image';
 import KakaoLoginForm from '@/components/main/KakaoLoginForm.js';
-import { loginUser } from '@/app/main/actions.js';
 import { useRouter } from 'next/navigation';
-
 import React, { useState, useRef } from 'react';
 import { Mail, Lock } from 'lucide-react';
+
+// ✅ 1. 서버 액션(loginUser) 지우고, 우리가 만든 '클라이언트 리모컨'을 가져옵니다.
+import { supabase } from '@/utils/supabase/client'; 
 
 export default function LoginPage() {
     const router = useRouter();
@@ -30,8 +31,12 @@ export default function LoginPage() {
 
             const formattedEmail = email.toLowerCase().trim();
 
-            // 여기서 실제 로그인 로직 호출
-            const { data: userData, error: loginError } = await loginUser(formattedEmail, password);
+            // ✅ 2. 여기서 서버 액션 대신, 클라이언트에서 "직접" 로그인합니다!
+            // 이렇게 하면 로컬스토리지에 인증 토큰이 100% 꽂힙니다.
+            const { data: userData, error: loginError } = await supabase.auth.signInWithPassword({
+                email: formattedEmail,
+                password: password,
+            });
 
             isSubmitting.current = false;
             setIsLoading(false);
@@ -41,17 +46,12 @@ export default function LoginPage() {
                 setError(true);
                 alert(loginError.message || '로그인에 실패했습니다.');
             } else {
-                // 💡 수정: userData를 찍어야 진짜 유저 정보가 나옵니다!
                 console.log("로그인 성공!", userData);
-
-                // 💡 더 깔끔한 페이지 이동 방식
-                router.push('/stock');
-                router.refresh(); // 서버 컴포넌트의 인증 상태를 강제로 새로고침
+                // 강제 새로고침으로 완벽하게 이동
+                window.location.href = '/stock';
             }
         }
     };
-
-
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 p-4">
