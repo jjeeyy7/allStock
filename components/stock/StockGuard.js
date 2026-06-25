@@ -4,36 +4,42 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/utils/supabase/client';
 
 export default function StockGuardContainer({ children }) {
-    const [isChecking, setIsChecking] = useState(true);
-    const router = useRouter();
+  const [isAuth, setIsAuth] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
-    useEffect(() => {
-        // 1. 인증 상태가 바뀔 때마다 감지
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-            console.log("인증 상태 변경됨:", event, session);
-            
-            if (session) {
-                setIsChecking(false); // 로그인 성공!
-            } else if (event === 'SIGNED_OUT') {
-                router.replace('/main'); // 로그아웃 시 튕기기
-            }
-        });
+  useEffect(() => {
+    // 1. 이미 로그인된 상태인지 확인
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        // 세션이 없으면 로그인 페이지로 이동
+        router.replace('/main');
+      } else {
+        setIsAuth(true);
+        setLoading(false);
+      }
+    };
 
-        // 2. 처음 페이지 들어왔을 때 딱 한 번만 세션 체크
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            if (!session) {
-                // 세션이 없으면 로그인 페이지로
-                router.replace('/main');
-            } else {
-                setIsChecking(false);
-            }
-        });
+    checkSession();
 
-        return () => subscription.unsubscribe();
-    }, [router]);
+    // 2. 인증 상태 변경 구독
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        setIsAuth(true);
+        setLoading(false);
+      } else if (event === 'SIGNED_OUT') {
+        setIsAuth(false);
+        router.replace('/main');
+      }
+    });
 
-    // 💡 화면이 깜빡거리거나 잘못된 접근이 뜨지 않도록 처리
-    if (isChecking) return <div>데이터 동기화 중...</div>;
+    return () => subscription.unsubscribe();
+  }, [router]);
 
-    return <>{children}</>;
+  if (loading) return <div>로딩 중...</div>;
+  if (!isAuth) return null;
+
+  return <>{children}</>;
 }
