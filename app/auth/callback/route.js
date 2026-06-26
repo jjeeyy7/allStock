@@ -1,5 +1,7 @@
-import { supabase } from '@/utils/supabase/server'; // Supabase 클라이언트 설정 경로
+import { createClient } from '@/utils/supabase/server';
 import { NextResponse } from 'next/server';
+
+const supabase = createClient();
 
 export async function GET(request) {
   const { searchParams, origin } = new URL(request.url);

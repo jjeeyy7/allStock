@@ -55,7 +55,6 @@ export default function LoginPage() {
                 return; // 여기서 함수를 끝내서 메인 페이지로 안 넘어가게 막습니다!
             } else {
                 console.log("로그인 성공!", userData);
-                // 강제 새로고침으로 완벽하게 이동
                 window.location.href = '/stock';
             }
         }
