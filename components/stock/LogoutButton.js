@@ -8,8 +8,7 @@ export default function LogoutButton() {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    router.push('/main'); // 로그인 페이지로 이동
-    router.refresh();      // 페이지 상태 초기화
+    window.location.href = '/main';
   };
 
   return (

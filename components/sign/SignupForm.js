@@ -28,6 +28,11 @@ export default function SignupForm() {
             return;
         }
 
+        if (password.length < 6 || password.length > 10) {
+        alert("핀 번호는 6자리에서 10자리 사이로 입력해주세요!");
+        return; // 여기서 함수를 끝내버려서 Supabase에 요청을 안 보냄!
+    }
+
         const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
         if (!email || !isValid) {
@@ -104,19 +109,32 @@ export default function SignupForm() {
             console.log("인증 성공, 저장 시작")
             const userId = authData.user?.id;
 
-        // 🔑 2. INSERT가 아닌 UPDATE 호출 (외래키 에러 해결!)
-        const { data, error: updateError } = await updateUserPin(userId, password); 
+            // 🔑 2. INSERT가 아닌 UPDATE 호출 (외래키 에러 해결!)
+            const { data, error: updateError } = await updateUserPin(userId, password);
 
-        isSubmitting.current = false;
-        setIsLoading(false);
+            isSubmitting.current = false;
+            setIsLoading(false);
 
-        if (updateError) {
-            console.error("핀 번호 저장 에러:", updateError);
-            alert("회원 정보 저장 중 오류가 발생했습니다.");
-        } else {
-            console.log("DB 저장(Update) 성공!", data);
-            setIsComplete(true);
-        }
+            if (updateError) {
+                console.error("핀 번호 저장 에러:", updateError);
+                alert("회원 정보 저장 중 오류가 발생했습니다.");
+            } else {
+                console.log("DB 저장(Update) 성공!", data);
+
+                // 🔑 변수 이름이 겹치지 않게 authError로 따로 받고, 
+                // data 대신 'password' 키를 직접 꽂아줍니다!
+                const { error: authError } = await supabase.auth.updateUser({
+                    password: password // 유저가 입력한 6자리 핀 번호 (예: "123456")
+                });
+
+                if (authError) {
+                    console.error("Supabase Auth 공식 비밀번호 등록 실패:", authError);
+                    alert("인증 시스템 비밀번호 등록 중 오류가 발생했습니다.");
+                } else {
+                    console.log("Supabase Auth 공식 비밀번호(핀번호) 등록 성공! 🎉");
+                    setIsComplete(true);
+                }
+            }
         }
     };
 
@@ -181,7 +199,8 @@ export default function SignupForm() {
                                             type="password"
                                             id="password"
                                             value={password}
-                                            maxLength={6}
+                                            minLength={6}
+                                            maxLength={10}
                                             inputMode="numeric"
                                             pattern="[0-9]*"
                                             onChange={(e) => {
@@ -191,13 +210,12 @@ export default function SignupForm() {
                                                 if (error) setError(false);
                                             }}
                                             placeholder="123456"
-                                            className={`w-full py-4 pl-12 pr-4 rounded-2xl border-2 outline-none transition-all ${error
-                                                ? 'border-red-400 bg-red-50'
-                                                : 'border-slate-200 bg-slate-50 focus:border-[#bc84ee] focus:bg-white focus:ring-4 focus:ring-purple-100'
+                                            className={`w-full py-4 pl-12 pr-4 rounded-2xl border-2 outline-none transition-all 
+                                               
+                                                
                                                 }`}
                                         />
                                     </div>
-                                    {error && <p className="text-red-500 text-sm mt-2">비밀번호를 입력해 주세요!</p>}
                                 </div>
 
                                 <button

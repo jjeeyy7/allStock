@@ -6,7 +6,7 @@ import React, { useState, useRef } from 'react';
 import { Mail, Lock } from 'lucide-react';
 
 // ✅ 1. 서버 액션(loginUser) 지우고, 우리가 만든 '클라이언트 리모컨'을 가져옵니다.
-import { supabase } from '@/utils/supabase/client'; 
+import { supabase } from '@/utils/supabase/client';
 
 export default function LoginPage() {
     const router = useRouter();
@@ -42,9 +42,17 @@ export default function LoginPage() {
             setIsLoading(false);
 
             if (loginError) {
-                console.error('로그인 실패:', loginError);
-                setError(true);
-                alert(loginError.message || '로그인에 실패했습니다.');
+                console.error("로그인 실패:", loginError.message);
+
+                // 에러 메시지가 'Invalid login credentials' (정보 불일치)일 경우
+                if (loginError.message?.includes("Invalid login credentials")) {
+                    alert("이메일 또는 핀 번호가 일치하지 않습니다. 다시 확인해주세요!");
+                } else {
+                    // 혹시 모를 다른 에러 (네트워크 끊김 등)
+                    alert("로그인 중 문제가 발생했습니다. 다시 시도해주세요.");
+                }
+
+                return; // 여기서 함수를 끝내서 메인 페이지로 안 넘어가게 막습니다!
             } else {
                 console.log("로그인 성공!", userData);
                 // 강제 새로고침으로 완벽하게 이동
