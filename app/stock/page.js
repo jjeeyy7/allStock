@@ -5,6 +5,7 @@ import OpenForm from '@/components/stock/OpenForm';
 import CategorySelect from '@/components/stock/CategorySelect';
 import StockGuardContainer from '@/components/stock/StockGuard';
 import LogoutButton from '@/components/stock/LogoutButton';
+import Link from 'next/link';
 
 import { supabase } from '@/lib/supabase';
 import { revalidatePath } from 'next/cache';
@@ -116,7 +117,9 @@ export default async function InventoryPage({ searchParams }) {
       <header className="flex items-center bg-white border-b border-gray-200">
         <div className="flex items-center px-6 py-3 font-bold gap-2">
           <Image src="/icon/logo.png" alt="Logo" width={40} height={40} />
-          <span className="text-2xl font-normal">All Stock</span>
+          <Link href="/stock">
+            <span className="text-2xl font-normal cursor-pointer">All Stock</span>
+          </Link>
         </div>
         <nav className="flex h-full">
           <button className="px-5 py-5 bg-[#e2dfdf] font-semibold text-black text-lg">재고현황</button>

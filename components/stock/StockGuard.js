@@ -38,7 +38,7 @@ export default function StockGuardContainer({ children }) {
     return () => subscription.unsubscribe();
   }, [router]);
 
-  if (loading) return <div>로딩 중...</div>;
+  if (loading) return <div className="flex justify-center items-center h-screen"> 로딩 중...</div>;
   if (!isAuth) return null;
 
   return <>{children}</>;
