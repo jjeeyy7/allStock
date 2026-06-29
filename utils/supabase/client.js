@@ -4,19 +4,11 @@ import { createBrowserClient } from '@supabase/ssr';
 let supabaseClient = null;
 
 export function createClient() {
-  if (supabaseClient) return supabaseClient;
 
-  supabaseClient = createBrowserClient(
+  return createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-    {
-      auth: {
-        persistSession: true, // 💡 이것이 있어야 localStorage에 토큰이 쌓입니다.
-        storageKey: 'supabase-auth-token', // 명시적으로 이름을 지정
-      }
-    }
-  );
-  return supabaseClient;
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  )
 }
 
 // 💡 밖으로 내보낼 때는 위 함수를 사용하세요.

@@ -1,20 +1,41 @@
-import { createClient } from '@/utils/supabase/server';
+import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
-
-const supabase = createClient();
+import { createServerClient } from '@supabase/ssr';
 
 export async function GET(request) {
-  const { searchParams, origin } = new URL(request.url);
-  const code = searchParams.get('code'); // URL에 포함된 인증 코드
-  const next = searchParams.get('next') ?? '/';
+    const { searchParams, origin } = new URL(request.url);
+    const code = searchParams.get('code');
+    const next = searchParams.get('next') ?? '/stock';
 
-  if (code) {
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
-    if (!error) {
-      return NextResponse.redirect(`${origin}${next}`);
+    if (code) {
+        const cookieStore = await cookies();
+        const supabase = createServerClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL,
+            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+            {
+                cookies: {
+                    getAll() {
+                        return cookieStore.getAll();
+                    },
+                    setAll(cookiesToSet) {
+                        cookiesToSet.forEach(({ name, value, options }) => {
+                            cookieStore.set(name, value, {
+                                ...options,
+                                path: '/',
+                                sameSite: 'lax', // 혹은 'none' (개발 환경에 따라 조절)
+                                secure: process.env.NODE_ENV === 'production'
+                            });
+                        });
+                    },
+                },
+            }
+        );
+
+        const { error } = await supabase.auth.exchangeCodeForSession(code);
+        if (!error) {
+            return NextResponse.redirect(`${origin}${next}`);
+        }
     }
-  }
 
-  // 에러 발생 시 로그인 페이지로 리다이렉트
-  return NextResponse.redirect(`${origin}/auth/auth-code-error`);
+    return NextResponse.redirect(`${origin}/auth/auth-code-error`);
 }

@@ -20,7 +20,8 @@ export default function LoginForm() {
       provider: 'kakao',
       options: {
         // 아까 우리가 만든 콜백 라우트(/auth/callback)로 다시 돌아오라고 주소를 적어줍니다!
-        redirectTo: `https://pdkzxpdjcapqzhlswjxz.supabase.co/auth/v1/callback`, 
+        // redirectTo: `https://pdkzxpdjcapqzhlswjxz.supabase.co/auth/v1/callback`, 
+        redirectTo: `${window.location.origin}/auth/callback`,
       },
     });
 
