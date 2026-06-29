@@ -3,25 +3,35 @@
 import { createClient } from '@/utils/supabase/server';
 
 export async function loginUser(email, password) {
-    
     const supabase = await createClient();
 
-    const { data, error } = await supabase
-        .from('profiles')
-        .select('id, email, pin_code') // 핀 번호도 같이 가져와야 비교가 가능합니다!
-        .eq('email', email)
-        .maybeSingle(); 
+    // 1. 진짜 인증 시도
+    const { data, error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password, 
+    });
 
-    // 1. 에러가 발생했거나, 유저를 아예 못 찾은 경우
-    if (error || !data) {
-        return { data: null, error: { message: "등록되지 않은 이메일입니다." } };
+    if (error) {
+        return { data: null, error: { message: "이메일이나 핀 번호가 일치하지 않습니다." } };
     }
 
-    // 2. 🔑 핵심 체킹: DB의 핀 번호와 입력한 핀 번호(password) 비교
-    if (data.pin_code !== password) {
-        return { data: null, error: { message: "핀 번호가 일치하지 않습니다." } };
-    }
+    // 2. getUser()를 다시 부를 필요 없이, 여기서 data.user를 확인하면 됩니다!
+    console.log("로그인 성공! 유저 ID:", data.user.id);
 
-    // 3. 둘 다 통과하면 로그인 성공!
     return { data, error: null };
+}
+
+export async function loginAction(email, password) {
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+
+  if (error) {
+    return { error: error.message };
+  }
+  
+  // 성공 시 쿠키가 자동으로 설정됩니다.
+  return { success: true };
 }

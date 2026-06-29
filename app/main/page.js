@@ -4,6 +4,8 @@ import KakaoLoginForm from '@/components/main/KakaoLoginForm.js';
 import { useRouter } from 'next/navigation';
 import React, { useState, useRef } from 'react';
 import { Mail, Lock } from 'lucide-react';
+import { loginAction } from './actions'; // 서버 액션 import
+
 
 // ✅ 1. 서버 액션(loginUser) 지우고, 우리가 만든 '클라이언트 리모컨'을 가져옵니다.
 import { supabase } from '@/utils/supabase/client';
@@ -20,43 +22,19 @@ export default function LoginPage() {
         e.preventDefault();
         if (isSubmitting.current) return;
 
-        const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        isSubmitting.current = true;
+        setIsLoading(true);
 
-        if (!email || !isValid) {
+        // ✅ 서버 액션 호출 (이게 실행되면 쿠키가 구워집니다)
+        const result = await loginAction(email, password);
+
+        if (result?.error) {
             setError(true);
-        } else {
-            setError(false);
-            isSubmitting.current = true;
-            setIsLoading(true);
-
-            const formattedEmail = email.toLowerCase().trim();
-
-            // ✅ 2. 여기서 서버 액션 대신, 클라이언트에서 "직접" 로그인합니다!
-            // 이렇게 하면 로컬스토리지에 인증 토큰이 100% 꽂힙니다.
-            const { data: userData, error: loginError } = await supabase.auth.signInWithPassword({
-                email: formattedEmail,
-                password: password,
-            });
-
             isSubmitting.current = false;
             setIsLoading(false);
-
-            if (loginError) {
-                console.error("로그인 실패:", loginError.message);
-
-                // 에러 메시지가 'Invalid login credentials' (정보 불일치)일 경우
-                if (loginError.message?.includes("Invalid login credentials")) {
-                    alert("이메일 또는 핀 번호가 일치하지 않습니다. 다시 확인해주세요!");
-                } else {
-                    // 혹시 모를 다른 에러 (네트워크 끊김 등)
-                    alert("로그인 중 문제가 발생했습니다. 다시 시도해주세요.");
-                }
-
-                return; // 여기서 함수를 끝내서 메인 페이지로 안 넘어가게 막습니다!
-            } else {
-                console.log("로그인 성공!", userData);
-                window.location.href = '/stock';
-            }
+        } else {
+            // ✅ 성공하면 페이지 이동 (전체 새로고침을 위해 window.location.href 권장)
+            window.location.href = '/stock'; 
         }
     };
 
@@ -86,6 +64,7 @@ export default function LoginPage() {
                                 className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm"
                                 required
                             />
+
                         </div>
                     </div>
 
