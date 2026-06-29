@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import SearchButton from '@/components/stock/SearchButton';
+import SearchBar from '@/components/stock/SearchBar';
 import StockContainer from '@/components/stock/StockContainer';
 import OpenForm from '@/components/stock/OpenForm';
 import CategorySelect from '@/components/stock/CategorySelect';
@@ -21,7 +21,6 @@ export default async function InventoryPage({ searchParams }) {
   async function saveProductOnServer(formData) {
     "use server";
     const supabase = await createClient();
-
     const today = new Date();
     const formattedDate = `${today.getFullYear()}.${String(today.getMonth() + 1).padStart(2, '0')}.${String(today.getDate()).padStart(2, '0')}`;
 
@@ -57,20 +56,29 @@ export default async function InventoryPage({ searchParams }) {
     revalidatePath('/stock');
   }
 
-  // 데이터 로딩
+  // 데이터 로딩 로직
   const params = await searchParams;
   const selectedCategory = params?.category || "";
+  const searchKeyword = params?.search || "";
 
+  // 1. 쿼리 시작 (조인 포함)
   let itemsQuery = supabase
     .from('items')
     .select('*, categories!inner(categories_name), units(unit_name), icons(icon_url)')
     .eq('user_id', user.id)
     .order('id', { ascending: false });
 
+  // 2. 검색 조건 추가
+  if (searchKeyword) {
+    itemsQuery = itemsQuery.ilike('name', `%${searchKeyword}%`);
+  }
+
+  // 3. 카테고리 조건 추가
   if (selectedCategory) {
     itemsQuery = itemsQuery.eq('categories.categories_name', selectedCategory);
   }
 
+  // 4. 데이터 일괄 로드
   const [itemsResponse, categoriesResponse, unitsResponse, iconsResponse] = await Promise.all([
     itemsQuery,
     supabase.from('categories').select('*').order('categories_id', { ascending: true }),
@@ -91,15 +99,12 @@ export default async function InventoryPage({ searchParams }) {
           <button className="px-5 py-5 hover:bg-gray-50 font-medium text-gray-800 text-lg">설정</button>
           <button className="px-5 py-5 hover:bg-gray-50 font-medium text-gray-800 text-lg">내정보</button>
         </nav>
-        <div className="ml-auto flex items-center hover:bg-red-100  px-6"><LogoutButton /></div>
+        <div className="ml-auto flex items-center hover:bg-red-100 px-6"><LogoutButton /></div>
       </header>
 
       <main className="p-8">
         <div className="flex justify-between items-center mb-8 gap-4">
-          <div className="flex-1 max-w-[400px] flex items-center bg-transparent border border-gray-500 rounded-full px-4 py-1.5">
-            <input type="text" className="bg-transparent outline-none w-full text-lg" />
-            <SearchButton />
-          </div>
+          <SearchBar /> 
           <div className="flex items-center gap-6">
             <CategorySelect allCategories={categoriesResponse.data} selectedCategory={selectedCategory} />
             <OpenForm

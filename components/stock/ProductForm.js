@@ -56,11 +56,21 @@ export default function ProductForm({ type, data, allCategories, allUnits, iconL
                 alert("제품 이름은 7글자 이하로 입력해주세요!");
                 return;
             }
-            
+
             if (!form.category) {
                 alert("카테고리를 지정해주세요");
                 return;
             }
+
+            if (form.option.length >= 60) {
+                alert("옵션은 60글자 이하로 입력해주세요!");
+                return;
+            }
+
+            if(!Number.isInteger(Number(form.stock)) || !Number.isInteger(Number(form.total)) || !Number.isInteger(Number(form.min_stock))) {
+                alert("재고 수량은 정수로 입력해주세요!");
+                return;
+            }   
 
             if (Number(form.stock) > Number(form.total)) {
                 alert("현재 재고량이 총 수량을 초과할 수 없습니다.");
@@ -221,7 +231,7 @@ export default function ProductForm({ type, data, allCategories, allUnits, iconL
                         ))}
                         <div className="flex items-center gap-2">
                             <label className="text-sm text-gray-500 min-w-[48px]">분류</label>
-                           
+
                             <select
                                 name="category"
                                 value={form.category}

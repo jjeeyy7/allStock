@@ -31,7 +31,7 @@ export default function StockContainer({ stockItems, allCategories, allUnits, ic
                 <div className="w-16 h-16 bg-white-200 rounded-lg flex items-center justify-center text-3xl border border-gray-300 overflow-hidden relative">
                   <Image src={imageUrl} alt="아이템 사진" fill sizes="50px" className="object-cover" />
                 </div>
-                <div>
+                <div className="w-[230px] h-[70px]">
                   <h3 className="text-2xl font-bold mb-1">{item.name}</h3>
                   <p className="text-xs text-gray-600">
                     분류: {item.categories?.categories_name || "미지정"}
