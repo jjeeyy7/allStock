@@ -52,3 +52,5 @@ export async function deleteProductOnServer(item_id) {
   await supabase.from('items').delete().eq('id', item_id).eq('user_id', user.id);
   revalidatePath('/stock');
 }
+
+

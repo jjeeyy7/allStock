@@ -12,8 +12,8 @@ export default function StockContainer({ stockItems, allCategories, allUnits, ic
           const imageUrl = item.icons?.icon_url || "/icon/box.png";
 
           return (
-            <div key={item.id} className="bg-white rounded-xl p-5 shadow-sm relative w-[300px]">
-              
+            <div key={item.id} className="bg-white rounded-xl p-5 shadow-sm relative w-[358px] h-[250px] flex flex-col justify-between">
+
               {/* 💡 설정(수정) 버튼: map 싹 지우고 하나만 쏙! */}
               <div className="absolute top-5 right-5">
                 <OpenForm
@@ -57,7 +57,14 @@ export default function StockContainer({ stockItems, allCategories, allUnits, ic
               </div>
             </div>
           );
-        })}
+        })
+      }
+
+      {!stockItems || stockItems.length === 0 ? (
+        <div className="w-full text-center text-gray-500 py-20">
+          등록된 재고가 없습니다.  <br /> 제품추가 버튼을 눌러 재고를 등록해보세요!
+        </div>
+      ) : null}
     </div>
   );
 }

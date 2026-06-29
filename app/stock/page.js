@@ -21,7 +21,7 @@ export default async function InventoryPage({ searchParams }) {
   async function saveProductOnServer(formData) {
     "use server";
     const supabase = await createClient();
-    
+
     const today = new Date();
     const formattedDate = `${today.getFullYear()}.${String(today.getMonth() + 1).padStart(2, '0')}.${String(today.getDate()).padStart(2, '0')}`;
 
@@ -85,7 +85,13 @@ export default async function InventoryPage({ searchParams }) {
           <Image src="/icon/logo.png" alt="Logo" width={40} height={40} />
           <Link href="/stock"><span className="text-2xl font-normal cursor-pointer">All Stock</span></Link>
         </div>
-        <div className="ml-auto flex items-center gap-4 px-6"><LogoutButton /></div>
+        <nav className="flex h-full">
+          <button className="px-5 py-5 bg-[#e2dfdf] font-semibold text-black text-lg">재고현황</button>
+          <button className="px-5 py-5 hover:bg-gray-50 font-medium text-gray-800 text-lg">대시보드</button>
+          <button className="px-5 py-5 hover:bg-gray-50 font-medium text-gray-800 text-lg">설정</button>
+          <button className="px-5 py-5 hover:bg-gray-50 font-medium text-gray-800 text-lg">내정보</button>
+        </nav>
+        <div className="ml-auto flex items-center hover:bg-red-100  px-6"><LogoutButton /></div>
       </header>
 
       <main className="p-8">
