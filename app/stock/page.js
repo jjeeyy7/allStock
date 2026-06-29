@@ -94,12 +94,20 @@ export default async function InventoryPage({ searchParams }) {
           <Link href="/stock"><span className="text-2xl font-normal cursor-pointer">All Stock</span></Link>
         </div>
         <nav className="flex h-full">
-          <button className="px-5 py-5 bg-[#e2dfdf] font-semibold text-black text-lg">재고현황</button>
-          <button className="px-5 py-5 hover:bg-gray-50 font-medium text-gray-800 text-lg">대시보드</button>
-          <button className="px-5 py-5 hover:bg-gray-50 font-medium text-gray-800 text-lg">설정</button>
-          <button className="px-5 py-5 hover:bg-gray-50 font-medium text-gray-800 text-lg">내정보</button>
+          <Link href="/stock">
+            <button className="px-5 py-5 bg-[#e2dfdf] font-semibold text-black text-lg cursor-pointer ">재고현황</button>
+          </Link>
+          <Link href="/dashboard">
+            <button className="px-5 py-5 hover:bg-gray-50 font-medium text-gray-800 text-lg cursor-pointer ">대시보드</button>
+          </Link>
+          <Link href="/settings">
+            <button className="px-5 py-5 hover:bg-gray-50 font-medium text-gray-800 text-lg cursor-pointer ">설정</button>
+          </Link>
+          <Link href="/myPage">
+            <button className="px-5 py-5 hover:bg-gray-50 font-medium text-gray-800 text-lg cursor-pointer ">내정보</button>
+          </Link>
         </nav>
-        <div className="ml-auto flex items-center hover:bg-red-100 px-6"><LogoutButton /></div>
+        <LogoutButton />
       </header>
 
       <main className="p-8">
